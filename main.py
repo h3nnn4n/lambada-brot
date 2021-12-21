@@ -1,2 +1,10 @@
+import logging
+
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+
 def handler(event, context):
-    return {"message": "hi"}
+    logger.info(f"got {event=}")
+    logger.info(f"got {context=}")
+    return "message"
