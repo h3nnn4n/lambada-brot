@@ -1,22 +1,33 @@
 import json
 import logging
+from decimal import Decimal
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
-def mandelbrot_point(c, iters=256):
-    return 0
+def mandelbrot_point(c, max_iters=256):
+    z = 0
+    n = 0
+
+    while abs(z) <= 2 and n < max_iters:
+        z = z * z + c
+        n += 1
+
+    return n
 
 
 def process_request(data):
-    xmin = data.get("xmin")
-    ymin = data.get("ymin")
-    xxmax = data.get("xmax")
-    yxmax = data.get("ymax")
-    size = data.get("size")
+    xmin = Decimal(data.get("xmin"))
+    ymin = Decimal(data.get("ymin"))
+    xmax = Decimal(data.get("xmax"))
+    ymax = Decimal(data.get("ymax"))
+    size = int(data.get("size"))
+    max_iters = int(data.get("max_iters"))
 
-    return 1
+    c = complex(xmin, ymin)
+
+    return mandelbrot_point(c, size)
 
 
 def handler(event, context):
