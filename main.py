@@ -1,5 +1,6 @@
 import json
 import logging
+from time import time
 from decimal import Decimal
 
 logger = logging.getLogger()
@@ -45,9 +46,12 @@ def handler(event, context):
     logger.debug(f"{raw_request_body=}")
     request_body = json.loads(raw_request_body)
 
+    t_start = time()
     result = process_request(request_body)
+    t_end = time()
+    duration = t_end - t_start
 
-    body = {"request": request_body, "result": result}
+    body = {"request": request_body, "result": result, "duration": duration}
     logger.debug(f"returning {body=}")
     response = {"statusCode": 200, "body": json.dumps(body)}
     return response
