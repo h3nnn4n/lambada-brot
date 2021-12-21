@@ -3,7 +3,7 @@ import logging
 from decimal import Decimal
 
 logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 
 def mandelbrot_point(c, max_iters=256):
@@ -25,9 +25,18 @@ def process_request(data):
     size = int(data.get("size"))
     max_iters = int(data.get("max_iters"))
 
-    c = complex(xmin, ymin)
+    dx = (xmax - xmin) / size
+    dy = (ymax - ymin) / size
 
-    return mandelbrot_point(c, size)
+    data = []
+    for ix in range(size):
+        for iy in range(size):
+            x = xmin + dx * ix
+            y = ymin + dy * iy
+            c = complex(x, y)
+            data.append(mandelbrot_point(c, size))
+
+    return data
 
 
 def handler(event, context):
@@ -39,5 +48,6 @@ def handler(event, context):
     result = process_request(request_body)
 
     body = {"request": request_body, "result": result}
+    logger.debug(f"returning {body=}")
     response = {"statusCode": 200, "body": json.dumps(body)}
     return response
