@@ -8,6 +8,8 @@ resource "aws_lambda_function" "main" {
   handler = "main.handler"
   runtime = "python3.9"
 
+  timeout = 60
+
   role = aws_iam_role.lambda_role.arn
 
   depends_on = [
