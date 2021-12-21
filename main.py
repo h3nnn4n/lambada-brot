@@ -34,7 +34,7 @@ def process_request(data):
             x = xmin + dx * ix
             y = ymin + dy * iy
             c = complex(x, y)
-            data.append(mandelbrot_point(c, size))
+            data.append(mandelbrot_point(c, max_iters))
 
     return data
 
