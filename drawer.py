@@ -33,14 +33,11 @@ def main():
     xmax = -0.744030
     ymax = 0.127433
 
-    xmin = -2.0
-    ymin = -1.5
-    xmax = 1.5
-    ymax = 1.5
+    n_threads = 64
 
-    size = 64 * 8
-    step_size = 16 * 8
-    max_iters = 256
+    size = 1024
+    step_size = 32
+    max_iters = 1024
 
     dx = (xmax - xmin) / (size // step_size)
     dy = (ymax - ymin) / (size // step_size)
@@ -67,7 +64,7 @@ def main():
             request_chunks.append(request)
 
     image_data = {}
-    with Pool() as p:
+    with Pool(n_threads) as p:
         for r in p.map(remote_mandel, request_chunks):
             k, v = next(iter(r.items()))
             image_data[k] = v
