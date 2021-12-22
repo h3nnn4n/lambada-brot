@@ -36,7 +36,7 @@ def main():
     n_threads = 64
 
     size = 1024
-    step_size = 32
+    step_size = 64
     max_iters = 1024
 
     dx = (xmax - xmin) / (size // step_size)
