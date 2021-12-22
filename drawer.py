@@ -9,10 +9,9 @@ ENDPOINT = "https://4j10ejf71g.execute-api.us-east-1.amazonaws.com/mandel"
 def remote_mandel(request):
     response = requests.post(ENDPOINT, json=request)
     data = json.loads(response.content)
-    print(f"{request} {data['duration']}")
-    # print(request)
     ix = request["ix"]
     iy = request["iy"]
+    print(f"[{ix:>3}, {iy:>3}]: {data['duration']:>4.2f}")
     return {(ix, iy): data.get("result")}
 
 
