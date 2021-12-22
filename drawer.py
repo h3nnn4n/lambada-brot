@@ -1,12 +1,22 @@
 import json
+from multiprocessing import Pool
 
 import png
 import requests
 
+ENDPOINT = "https://4j10ejf71g.execute-api.us-east-1.amazonaws.com/mandel"
+
+
+def remote_mandel(request):
+    response = requests.post(ENDPOINT, json=request)
+    data = json.loads(response.content)
+    print(data.get("duration"))
+    ix = request["ix"]
+    iy = request["iy"]
+    return {(ix, iy): data.get("result")}
+
 
 def main():
-    endpoint = "https://4j10ejf71g.execute-api.us-east-1.amazonaws.com/mandel"
-
     xmin = -0.742030
     ymin = 0.125433
     xmax = -0.744030
@@ -17,14 +27,14 @@ def main():
     xmax = 1.5
     ymax = 1.5
 
-    size = 64
-    step_size = 16
+    size = 64 * 8
+    step_size = 16 * 8
     max_iters = 256
 
     dx = (xmax - xmin) / step_size
     dy = (ymax - ymin) / step_size
 
-    image_data = {}
+    request_chunks = []
 
     for ix in range(int(size / step_size)):
         for iy in range(int(size / step_size)):
@@ -34,6 +44,8 @@ def main():
             ymax_ = ymax + dy * (iy + 1)
 
             request = {
+                "ix": ix,
+                "iy": iy,
                 "xmin": xmin_,
                 "ymin": ymin_,
                 "xmax": xmax_,
@@ -41,11 +53,13 @@ def main():
                 "size": step_size,
                 "max_iters": max_iters,
             }
+            request_chunks.append(request)
 
-            response = requests.post(endpoint, json=request)
-            data = json.loads(response.content)
-            image_data[(ix, iy)] = data.get("result")
-            print(data.get("duration"))
+    image_data = {}
+    with Pool() as p:
+        for r in p.map(remote_mandel, request_chunks):
+            k, v = next(iter(r.items()))
+            image_data[k] = v
 
     image_pixels = []
     for x in range(size):
@@ -63,7 +77,7 @@ def main():
     for i in range(size * size):
         image_pixels[i] = int(image_pixels[i] / max_pixel * 256)
 
-    square_image = [image_pixels[i * size:(i + 1) * size] for i in range(size)]
+    square_image = [image_pixels[i * size : (i + 1) * size] for i in range(size)]
 
     with open("mandel.ppm", "wt") as f:
         f.write("P2\n")
