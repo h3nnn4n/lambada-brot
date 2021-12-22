@@ -1,7 +1,6 @@
 import json
 from multiprocessing import Pool
 
-import png
 import requests
 
 ENDPOINT = "https://4j10ejf71g.execute-api.us-east-1.amazonaws.com/mandel"
@@ -77,8 +76,6 @@ def main():
     for i in range(size * size):
         image_pixels[i] = int(image_pixels[i] / max_pixel * 256)
 
-    square_image = [image_pixels[i * size : (i + 1) * size] for i in range(size)]
-
     with open("mandel.ppm", "wt") as f:
         f.write("P2\n")
         f.write(f"{size} {size}\n")
@@ -88,10 +85,6 @@ def main():
             f.write(f"{v} ")
             if k % size == 0 and k > 0:
                 f.write("\n")
-
-    with open("mandel.png", "wb") as f:
-        w = png.Writer(size, size, bitdepth=16)
-        w.write(f, square_image)
 
 
 if __name__ == "__main__":
