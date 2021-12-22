@@ -9,10 +9,23 @@ ENDPOINT = "https://4j10ejf71g.execute-api.us-east-1.amazonaws.com/mandel"
 def remote_mandel(request):
     response = requests.post(ENDPOINT, json=request)
     data = json.loads(response.content)
-    print(data.get("duration"))
+    print(f"{request} {data['duration']}")
+    # print(request)
     ix = request["ix"]
     iy = request["iy"]
     return {(ix, iy): data.get("result")}
+
+
+def write_ppm(filename, size, data):
+    with open(filename, "wt") as f:
+        f.write("P2\n")
+        f.write(f"{size} {size}\n")
+        f.write("256\n")
+
+        for k, v in enumerate(data):
+            f.write(f"{v} ")
+            if k % size == 0 and k > 0:
+                f.write("\n")
 
 
 def main():
@@ -30,8 +43,8 @@ def main():
     step_size = 16 * 8
     max_iters = 256
 
-    dx = (xmax - xmin) / step_size
-    dy = (ymax - ymin) / step_size
+    dx = (xmax - xmin) / (size // step_size)
+    dy = (ymax - ymin) / (size // step_size)
 
     request_chunks = []
 
@@ -39,8 +52,8 @@ def main():
         for iy in range(int(size / step_size)):
             xmin_ = xmin + dx * ix
             ymin_ = ymin + dy * iy
-            xmax_ = xmax + dx * (ix + 1)
-            ymax_ = ymax + dy * (iy + 1)
+            xmax_ = xmin + dx * (ix + 1)
+            ymax_ = ymin + dy * (iy + 1)
 
             request = {
                 "ix": ix,
@@ -68,7 +81,7 @@ def main():
             ix = x % step_size
             iy = y % step_size
             pixel_index = ix + iy * step_size
-            pixel = image_data[(block_ix, block_iy)][pixel_index]
+            pixel = image_data[(block_iy, block_ix)][pixel_index]
             image_pixels.append(pixel)
 
     max_pixel = max(image_pixels)
@@ -76,15 +89,7 @@ def main():
     for i in range(size * size):
         image_pixels[i] = int(image_pixels[i] / max_pixel * 256)
 
-    with open("mandel.ppm", "wt") as f:
-        f.write("P2\n")
-        f.write(f"{size} {size}\n")
-        f.write("256\n")
-
-        for k, v in enumerate(image_pixels):
-            f.write(f"{v} ")
-            if k % size == 0 and k > 0:
-                f.write("\n")
+    write_ppm("mandel.ppm", size, image_pixels)
 
 
 if __name__ == "__main__":

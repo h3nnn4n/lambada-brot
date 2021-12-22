@@ -4,7 +4,7 @@ from time import time
 from decimal import Decimal
 
 logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 
 def mandelbrot_point(c, max_iters=256):
